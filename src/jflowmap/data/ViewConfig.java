@@ -196,6 +196,10 @@ public class ViewConfig {
     return PropUtils.getDoubleOrElse(props, propName, defaultValue);
   }
 
+  public boolean getBooleanOrElse(String propName, boolean defaultValue) {
+    return PropUtils.getBooleanOrElse(props, propName, defaultValue);
+  }
+
   enum DataLoaders {
     CSV {
       @Override
@@ -296,7 +300,8 @@ public class ViewConfig {
           new FlowMapView((FlowMapGraph)data, areaMap, mapProjection(config),
               config.getDoubleOrElse(FlowMapView.VIEW_CONFIG_PROP_WEIGHT_FILTER_MIN, Double.NaN),
               FlowMapColorSchemes.findByName(
-                  config.getStringOrElse(FlowMapView.VIEW_CONFIG_PROP_COLOR_SCHEME, "Dark")));
+                  config.getStringOrElse(FlowMapView.VIEW_CONFIG_PROP_COLOR_SCHEME, "Dark")),
+              config.getBooleanOrElse(FlowMapView.VIEW_CONFIG_PROP_SHOW_DIRECTION_MARKERS, true));
       }
     }
 //    , FLOWMAPSMALLMULTIPLES {

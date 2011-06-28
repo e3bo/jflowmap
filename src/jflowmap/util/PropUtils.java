@@ -69,6 +69,15 @@ public class PropUtils {
     return value == null  ||  value.trim().length() == 0;
   }
 
+  public static boolean getBooleanOrElse(Properties props, String propName, boolean defaultValue) {
+    String val = props.getProperty(propName);
+    if (isEmpty(val)) {
+      return defaultValue;
+    }
+    return Boolean.parseBoolean(val.trim());
+  }
+
+
   public static Pair<String, String> requireOneOf(Properties props, String[] propNames) {
     for (String prop : propNames) {
       String val = props.getProperty(prop);

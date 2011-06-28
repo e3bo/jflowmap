@@ -56,13 +56,14 @@ public class FlowMapView extends AbstractCanvasView {
 
   public static final String VIEW_CONFIG_PROP_WEIGHT_FILTER_MIN = "view.flowmap.weightFilterMin";
   public static final String VIEW_CONFIG_PROP_COLOR_SCHEME = "view.flowmap.colorScheme";
+  public static final String VIEW_CONFIG_PROP_SHOW_DIRECTION_MARKERS = "view.flowmap.showDirectionMarkers";
 
   public FlowMapView(FlowMapGraph fmg, GeoMap areaMap, MapProjection proj) {
-    this(fmg, areaMap, proj, Double.NaN, null);
+    this(fmg, areaMap, proj, Double.NaN, null, false);
   }
 
   public FlowMapView(FlowMapGraph fmg, GeoMap areaMap, MapProjection proj, double weightFilterMin,
-      IFlowMapColorScheme colorScheme) {
+      IFlowMapColorScheme colorScheme, boolean showDirectionMarkers) {
     setVisualFlowMap(createVisualFlowMap(fmg, proj, fmg.getEdgeWeightAttrs().get(0)));
     if (areaMap != null) {
       visualFlowMap.setAreaMap(new PGeoMap(visualFlowMap, areaMap, proj));
@@ -73,6 +74,9 @@ public class FlowMapView extends AbstractCanvasView {
     if (colorScheme != null) {
       setColorScheme(colorScheme);
     }
+
+    getVisualFlowMap().getModel().setShowDirectionMarkers(showDirectionMarkers);
+      
     controlPanel = new ControlPanel(this, fmg.getAttrSpec());
   }
 
