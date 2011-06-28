@@ -27,6 +27,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -331,11 +332,19 @@ public class VisualFlowMap extends PNode implements ColorSchemeAware {
     @SuppressWarnings("unchecked")
     Iterator<Integer> it = graph.getEdgeTable().rowsSortedBy(flowWeightAttr, true);
 
+    // check that the locations actually differ enough to not cause X and Y to be the same point
+    // In inverse precision units; 1000 == 0.001 map units
+    final double PRECISION = 1000.0;
+
     while (it.hasNext()) {
       Edge edge = graph.getEdge(it.next());
 
       Node srcNode = edge.getSourceNode();
       Node targetNode = edge.getTargetNode();
+      
+      VisualNode fromNode = nodesToVisuals.get(srcNode);
+      VisualNode toNode = nodesToVisuals.get(targetNode);
+      VisualEdge visualEdge;
 
 //      if (edgeVisualsForNodesFilter != null) {
 //        if (!edgeVisualsForNodesFilter.accept(srcNode)  &&  !edgeVisualsForNodesFilter.accept(targetNode)) {
@@ -350,7 +359,19 @@ public class VisualFlowMap extends PNode implements ColorSchemeAware {
 //        );
 //      }
 
+      // Check that the rounded coordinates fall within our expected precision,
+      // ignore self-refferential loops found as they cause exceptions.
+      if (Math.round(fromNode.getValueX()*PRECISION)/PRECISION == Math.round(toNode.getValueX()*PRECISION)/PRECISION && 
+          Math.round(fromNode.getValueY()*PRECISION)/PRECISION == Math.round(toNode.getValueY()*PRECISION)/PRECISION) {
+        logger.warn(
+            "Self-referrential edge: " +
+            " [" + edge + "]"
+        );
+        continue; // skip the edge
+      }
+
       double value = edge.getDouble(flowWeightAttr);
+
       if (Double.isNaN(value)) {
         // Warning "Omitting edge with NaN value" Commented out: because it was slowing bundling down too much
 //        logger.warn(
@@ -360,10 +381,6 @@ public class VisualFlowMap extends PNode implements ColorSchemeAware {
 //          " [" + edge + "]"
 //        );
       } else {
-        VisualNode fromNode = nodesToVisuals.get(srcNode);
-        VisualNode toNode = nodesToVisuals.get(targetNode);
-
-        VisualEdge visualEdge;
         if (getFlowMapGraph().hasEdgeSubdivisionPoints(edge)) {
 
           Iterable<Point> points = MapProjections.projectAll(
